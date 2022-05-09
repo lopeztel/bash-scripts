@@ -13,8 +13,8 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit
 fi
 echo -e "${green}-I- Installing virt-manager dependencies${reset}"
-sudo pacman -S --noconfirm qemu virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat ebtables iptables libguestfs
-# sudo pacman -S qemu virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat ebtables libguestfs
+# sudo pacman -S --noconfirm qemu virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat ebtables iptables libguestfs
+sudo pacman -S qemu virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat ebtables libguestfs
 echo -e "${green}-I- Done"
 echo -e "-I- Enabling and starting libvirtd.service${reset}"
 sudo systemctl enable libvirtd.service
