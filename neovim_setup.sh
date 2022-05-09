@@ -17,6 +17,7 @@ echo -e "${green}-I- Installed necessary plugins for oh-my-zsh"
 
 echo -e "-I- Installing neovim${reset}"
 sudo pacman -S --noconfirm ripgrep fd neovim python-pynvim nodejs npm lazygit
+python -m pip install clang-format
 echo -e "${green}-I- Installing vim-plug${reset}"
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
