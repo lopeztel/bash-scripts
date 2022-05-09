@@ -4,11 +4,12 @@
 
 call plug#begin('~/.vim/plugged')
 
-" Appearance
+" Appearance and dashboard
 Plug 'arcticicestudio/nord-vim'
 "https://github.com/arcticicestudio/nord-vim
 Plug 'vim-airline/vim-airline'
-Plug 'mhinz/vim-startify'
+Plug 'goolord/alpha-nvim' 
+Plug 'folke/persistence.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 "https://github.com/kyazdani42/nvim-web-devicons
 
@@ -23,8 +24,10 @@ Plug 'voldikss/vim-floaterm'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'neovim/nvim-lspconfig'
+Plug 'p00f/clangd_extensions.nvim'
 Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'preservim/nerdcommenter'
+Plug 'windwp/nvim-autopairs'
 
 "Snippets and autocompletion
 Plug 'hrsh7th/cmp-buffer'
@@ -84,17 +87,89 @@ nnoremap <C-Right> <cmd>tabnext<cr>
 nnoremap <S-Right> <cmd>vsplit<cr>
 nnoremap <S-Down> <cmd>split<cr>
 
-"---------------------------Startify------------------------------
-"https://github.com/mhinz/vim-startify
-let g:startify_custom_header= [
-\ '                      _                         _       _                      ',
-\ '                     | |    ___  _ __   ___ ___| |_ ___| |                     ',
-\ '                     | |   / _ \| ._ \ / _ \_  / __/ _ \ |                     ',
-\ '                     | |__| (_) | |_) |  __// /| ||  __/ |                     ',
-\ '                     |_____\___/| .__/ \___/___|\__\___|_|                     ',
-\ '                                |_|                                            ',
-\ '                                                                               ',
-\ ]
+"---------------------------Dashboard-----------------------------
+"https://github.com/goolord/alpha-nvim
+"https://github.com/folke/persistence.nvim
+
+lua << EOF
+
+-- saving previous session
+require("persistence").setup{
+    event = "BufReadPre", --only start session saving when an actual file was opened
+}
+
+local alpha = require("alpha")
+local dashboard = require("alpha.themes.dashboard")
+-- Set header
+dashboard.section.header.val = {
+    "                                                     ",
+    "  ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗ ",
+    "  ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║ ",
+    "  ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║ ",
+    "  ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║ ",
+    "  ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║ ",
+    "  ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝ ",
+    "                                                     ",
+}
+
+-- Set menu
+dashboard.section.buttons.val = {
+    dashboard.button( "e", "  > New file" , ":ene <BAR> startinsert <CR>"),
+    dashboard.button( "f", "  > Find file", ":Telescope find_files<CR>"),
+    dashboard.button( "r", "  > Recent"   , ":Telescope oldfiles<CR>"),
+    dashboard.button( "p", "  > Restore previous session"   , ":lua require('persistence').load({ last = true })<CR>"),
+    dashboard.button( "s", "  > Settings" , ":e ~/.config/nvim/init.vim<CR>"),
+    dashboard.button( "u", "  > Update Plugins" , ":PlugUpdate<CR>"),
+    dashboard.button( "q", "  > Quit NVIM", ":qa<CR>"),
+}
+
+-- footer
+local function footer()
+  local v = vim.version()
+  local datetime = os.date " %d-%m-%Y   %H:%M:%S"
+  local platform = vim.fn.has "win32" == 1 and "" or ""
+  return string.format("  v%d.%d.%d %s  %s", v.major, v.minor, v.patch, platform, datetime)
+end
+
+dashboard.section.footer.val = footer()
+-- Send config to alpha
+alpha.setup(dashboard.opts)
+
+-- hide tabline and statusline on startup screen
+vim.api.nvim_create_augroup("alpha_tabline", { clear = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = "alpha_tabline",
+  pattern = "alpha",
+  command = "set showtabline=0 laststatus=0 noruler",
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = "alpha_tabline",
+  pattern = "alpha",
+  callback = function()
+    vim.api.nvim_create_autocmd("BufUnload", {
+      group = "alpha_tabline",
+      buffer = 0,
+      command = "set showtabline=2 ruler laststatus=3",
+    })
+  end,
+})
+-- Disable folding on alpha buffer
+vim.cmd([[
+    autocmd FileType alpha setlocal nofoldenable
+]])
+EOF
+"-----------------Alternative header for dashboard----------------
+" dashboard.section.header.val= {
+"  "                      _                         _       _                      ",
+"  "                     | |    ___  _ __   ___ ___| |_ ___| |                     ",
+"  "                     | |   / _ \| ._ \ / _ \_  / __/ _ \ |                     ",
+"  "                     | |__| (_) | |_) |  __// /| ||  __/ |                     ",
+"  "                     |_____\___/| .__/ \___/___|\__\___|_|                     ",
+"  "                                |_|                                            ",
+"  "                                                                               ",
+"  }
 
 "------------------vim-airline settings---------------------------
 "https://github.com/vim-airline/vim-airline
@@ -127,7 +202,8 @@ EOF
 " Find files using Telescope command-line sugar.
 nnoremap <leader>ff <cmd>Telescope find_files hidden=true<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep hidden=true<cr>
-nnoremap <leader>fs <cmd>Telescope grep_string hidden=true<cr>
+" nnoremap <leader>fs <cmd>Telescope grep_string hidden=true<cr>
+nnoremap <leader>fs <cmd>Telescope lsp_workspace_symbols<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 nnoremap <leader>ef <cmd>Telescope file_browser hidden=true<cr>
@@ -197,9 +273,12 @@ EOF
 "----------------------LSP----------------------------------------
 "https://github.com/williamboman/nvim-lsp-installer/
 "https://github.com/neovim/nvim-lspconfig
+"https://github.com/p00f/clangd_extensions.nvim
 lua << EOF
 -- LSP servers
 local servers = { "clangd", "sumneko_lua", "bashls", "cmake", "yamlls",
+    "pyright", "prosemd_lsp", "ltex", "lemminx", "vimls"}
+local servers_no_clangd = { "sumneko_lua", "bashls", "cmake", "yamlls",
     "pyright", "prosemd_lsp", "ltex", "lemminx", "vimls"}
 require("nvim-lsp-installer").setup({
     ensure_installed = servers, -- ensure these servers are always installed
@@ -252,6 +331,18 @@ cmp.setup {
       end
     end, { 'i', 's' }),
   }),
+  sorting = {
+    comparators = {
+        cmp.config.compare.offset,
+        cmp.config.compare.exact,
+        cmp.config.compare.recently_used,
+        require("clangd_extensions.cmp_scores"),
+        cmp.config.compare.kind,
+        cmp.config.compare.sort_text,
+        cmp.config.compare.length,
+        cmp.config.compare.order,
+    },
+  },
   sources = {
     { name = 'nvim_lsp' },
     { name = 'ultisnips' },
@@ -312,10 +403,26 @@ end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
-for _, lsp in pairs(servers) do
+for _, lsp in pairs(servers_no_clangd) do
   require('lspconfig')[lsp].setup {
     -- on_attach = on_attach, --without autocompletion
     capabilities = capabilities,
   }
 end
+
+-- clangd_extensions
+require("clangd_extensions").setup{
+  server = {
+    capabilities = capabilities,
+  }
+}
+
+EOF
+
+"-------------------------Autopairs-------------------------------
+"https://github.com/windwp/nvim-autopairs
+lua << EOF
+require('nvim-autopairs').setup({
+  disable_filetype = { "TelescopePrompt" , "vim" },
+})
 EOF
