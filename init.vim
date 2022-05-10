@@ -1,8 +1,11 @@
 " Author: Lopeztel
 " Description: Lopeztel's nvim config
-" Last Modified: May 07, 2022
+" Last Modified: May 10, 2022
 
 call plug#begin('~/.vim/plugged')
+
+"Optimization
+Plug 'lewis6991/impatient.nvim'
 
 " Appearance and dashboard
 Plug 'arcticicestudio/nord-vim'
@@ -10,6 +13,7 @@ Plug 'arcticicestudio/nord-vim'
 Plug 'vim-airline/vim-airline'
 Plug 'goolord/alpha-nvim' 
 Plug 'folke/persistence.nvim'
+Plug 'folke/which-key.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 "https://github.com/kyazdani42/nvim-web-devicons
 
@@ -88,6 +92,11 @@ nnoremap <C-Right> <cmd>tabnext<cr>
 nnoremap <S-Right> <cmd>vsplit<cr>
 nnoremap <S-Down> <cmd>split<cr>
 
+"---------------------------Impatient-----------------------------
+"https://github.com/lewis6991/impatient.nvim
+
+lua require("impatient")
+
 "---------------------------Dashboard-----------------------------
 "https://github.com/goolord/alpha-nvim
 "https://github.com/folke/persistence.nvim
@@ -123,6 +132,18 @@ dashboard.section.buttons.val = {
     dashboard.button( "u", "  > Update Plugins" , ":PlugUpdate<CR>"),
     dashboard.button( "q", "  > Quit NVIM", ":qa<CR>"),
 }
+
+-- quote
+table.insert(dashboard.config.layout, { type = "padding", val = 1 })
+table.insert(dashboard.config.layout, {
+  type = "text",
+  quote = require "alpha.fortune"(),
+  val = "\t\t\tNavigation\n\n<C-t>    Open a new tab\n<C-Left>    Go to previous tab\n<C-Right>    Go to next tab\n<S-Right>    Split right\n<S-Down>    Split below\n<C-h>    Move to the window left\n<C-j>    Move to the window below\n<C-k>    Move to the window above\n<C-l>    Move to the window right",
+  opts = {
+    position = "center",
+    hl = "AlphaQuote",
+  },
+})
 
 -- footer
 local function footer()
@@ -172,10 +193,63 @@ EOF
 "  "                                                                               ",
 "  }
 
+"-------------------------which-key-------------------------------
+"https://github.com/folke/which-key.nvim
+
+lua << EOF
+local wk = require("which-key")
+
+wk.register({
+  f = {
+        name = "Find operations", -- file group name
+        f = { "files" },
+        g = { "string" },
+        b = { "in buffers" },
+        h = { "in help tags" },
+        s = { "in workspace symbols" },
+        o = { "in recent files" },
+      },
+  d = { "show diagnostics (hover)" },
+  q = { "show diagnostics (list)" },
+  t = {
+        name = "Terminal",
+        n = { "new" },
+        t = { "toggle" },
+        h = { "prev" },
+        l = { "next" },
+      },
+  ["/"] = { "Toggle comment" },
+  c = {
+      name = "comments and clang-format",
+      t = { "Toggle auto format" },
+      f = { "format selection" },
+      },
+  e = { "open file explorer" },
+  w = {
+        name = "Workspace",
+        a = { "add folder" },
+        r = { "remove folder" },
+        l = { "list folders" },
+      },
+  }, { prefix = "<leader>" })
+
+wk.register({
+  a = { "code actions" },
+  t = { "go to type definition" },
+  n = { "rename symbol under cursor" },
+  D = { "go to declaration" },
+  d = { "go to definition" },
+  I = { "go to implementation" },
+  r = { "go to references" },
+  }, { prefix = 'g' })
+
+wk.setup {}
+EOF
+
 "------------------vim-airline settings---------------------------
 "https://github.com/vim-airline/vim-airline
-let g:airline_extensions_tabline_enabled = 1
-let g:airline_extensions_tabline_formatter = 'unique_tail'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
 let g:airline_powerline_fonts = 1
 " let g:Powerline_symbols = 'fancy'
 
@@ -203,11 +277,12 @@ EOF
 " Find files using Telescope command-line sugar.
 nnoremap <leader>ff <cmd>Telescope find_files hidden=true<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep hidden=true<cr>
+nnoremap <leader>fo <cmd>Telescope oldfiles hidden=true<cr>
 " nnoremap <leader>fs <cmd>Telescope grep_string hidden=true<cr>
 nnoremap <leader>fs <cmd>Telescope lsp_workspace_symbols<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-nnoremap <leader>ef <cmd>Telescope file_browser hidden=true<cr>
+nnoremap <leader>e <cmd>Telescope file_browser hidden=true<cr>
 
 "needs fd and ripgrep
 
@@ -233,7 +308,7 @@ nmap <Leader>/ <plug>NERDCommenterToggle
 
 "-----------------------Floaterm----------------------------------
 "https://github.com/voldikss/vim-floaterm
-let g:floaterm_keymap_new = '<Leader>t'
+let g:floaterm_keymap_new = '<Leader>tn'
 let g:floaterm_keymap_prev = '<Leader>th'
 let g:floaterm_keymap_next = '<Leader>tl'
 let g:floaterm_keymap_toggle = '<Leader>tt'
@@ -372,7 +447,7 @@ cmp.setup.cmdline(':', {
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 local opts = {noremap=true, silent=true}
-vim.api.nvim_set_keymap('n', '<leader>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>d', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
 vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
 vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
@@ -385,14 +460,14 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gI', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gt', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gt', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'ga', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   -- vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
     
@@ -438,7 +513,7 @@ let g:clang_format#style_options = {
             \ "BasedOnSyle" : "LLVM"}
 
 " map to <Leader>f in C++ code
-autocmd FileType c,cpp,objc nnoremap <buffer><Leader>f :<C-u>ClangFormat<CR>
-autocmd FileType c,cpp,objc vnoremap <buffer><Leader>f :ClangFormat<CR>
+autocmd FileType c,cpp,objc nnoremap <buffer><Leader>cf :<C-u>ClangFormat<CR>
+autocmd FileType c,cpp,objc vnoremap <buffer><Leader>cf :ClangFormat<CR>
 " Toggle auto formatting:
-nmap <Leader>C :ClangFormatAutoToggle<CR>
+nmap <Leader>ct :ClangFormatAutoToggle<CR>
