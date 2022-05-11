@@ -33,6 +33,7 @@ Plug 'rhysd/vim-clang-format'
 Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'preservim/nerdcommenter'
 Plug 'windwp/nvim-autopairs'
+Plug 'mfussenegger/nvim-dap'
 
 "Snippets and autocompletion
 Plug 'hrsh7th/cmp-buffer'
@@ -138,7 +139,7 @@ table.insert(dashboard.config.layout, { type = "padding", val = 1 })
 table.insert(dashboard.config.layout, {
   type = "text",
   quote = require "alpha.fortune"(),
-  val = "\t\t\tNavigation\n\n<C-t>    Open a new tab\n<C-Left>    Go to previous tab\n<C-Right>    Go to next tab\n<S-Right>    Split right\n<S-Down>    Split below\n<C-h>    Move to the window left\n<C-j>    Move to the window below\n<C-k>    Move to the window above\n<C-l>    Move to the window right",
+  val = "\t\t\tNAVIGATION:\n\n<C-t>    Open a new tab\n<C-Left>    Go to previous tab\n<C-Right>    Go to next tab\n<S-Right>    Split right\n<S-Down>    Split below\n<C-h>    Move to the window left\n<C-j>    Move to the window below\n<C-k>    Move to the window above\n<C-l>    Move to the window right",
   opts = {
     position = "center",
     hl = "AlphaQuote",
@@ -235,7 +236,7 @@ wk.register({
 
 wk.register({
   a = { "code actions" },
-  t = { "go to type definition" },
+  s = { "go to type definition" },
   n = { "rename symbol under cursor" },
   D = { "go to declaration" },
   d = { "go to definition" },
@@ -384,6 +385,11 @@ cmp.setup {
       maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
     })
   },
+  snippet = {
+    expand = function(args)
+    vim.fn["UltiSnips#Anon"](args.body)
+    end,
+  },
   mapping = cmp.mapping.preset.insert({
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -465,7 +471,7 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gt', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'ga', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
@@ -517,3 +523,7 @@ autocmd FileType c,cpp,objc nnoremap <buffer><Leader>cf :<C-u>ClangFormat<CR>
 autocmd FileType c,cpp,objc vnoremap <buffer><Leader>cf :ClangFormat<CR>
 " Toggle auto formatting:
 nmap <Leader>ct :ClangFormatAutoToggle<CR>
+
+"-----------------------DAP---------------------------------------
+"https://github.com/mfussenegger/nvim-dap
+
