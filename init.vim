@@ -29,7 +29,8 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'neovim/nvim-lspconfig'
 Plug 'p00f/clangd_extensions.nvim'
-Plug 'rhysd/vim-clang-format'
+" Plug 'rhysd/vim-clang-format'
+Plug 'sbdchd/neoformat'
 Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'preservim/nerdcommenter'
 Plug 'windwp/nvim-autopairs'
@@ -508,20 +509,13 @@ require('nvim-autopairs').setup({
 EOF
 
 "-----------------------clang-format------------------------------
-"https://github.com/rhysd/vim-clang-format
-let g:clang_format#style_options = {
-            \ "AccessModifierOffset" : -4,
-            \ "AllowShortIfStatementsOnASingleLine" : "true",
-            \ "AlwaysBreakTemplateDeclarations" : "true",
-            \ "Standard" : "C++11",
-            \ "BasedOnSyle" : "LLVM"}
-
-" map to <Leader>f in C++ code
-autocmd FileType c,cpp,objc nnoremap <buffer><Leader>cf :<C-u>ClangFormat<CR>
-autocmd FileType c,cpp,objc vnoremap <buffer><Leader>cf :ClangFormat<CR>
-" Toggle auto formatting:
-nmap <Leader>ct :ClangFormatAutoToggle<CR>
-
+let g:neoformat_cpp_clangformat = {
+    \ 'exe': 'clang-format-11',
+    \ 'args': ['--style="{BasedOnStyle: llvm, IndentWidth: 4, AccessModifierOffset: -4, AllowShortIfStatementsOnASingleLine: true, AlwaysBreakTemplateDeclarations: true, Standard: c++11, BreakBeforeBraces: Stroustrup}"'],
+    \ 'stdin': 1,
+    \}
+let g:neoformat_enabled_cpp = ['clangformat']
+let g:neoformat_enabled_c = ['clangformat']
 "-----------------------DAP---------------------------------------
 "https://github.com/mfussenegger/nvim-dap
 
