@@ -29,13 +29,11 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'neovim/nvim-lspconfig'
 Plug 'p00f/clangd_extensions.nvim'
-" Plug 'rhysd/vim-clang-format'
-Plug 'sbdchd/neoformat'
+Plug 'rhysd/vim-clang-format'
 Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'preservim/nerdcommenter'
 Plug 'windwp/nvim-autopairs'
 Plug 'mfussenegger/nvim-dap'
-Plug 'ray-x/lsp_signature.nvim' " TODO: Figure out how to make this one work
 
 "Snippets and autocompletion
 Plug 'hrsh7th/cmp-buffer'
@@ -44,6 +42,7 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'SirVer/ultisnips'
+Plug 'ray-x/lsp_signature.nvim'
 Plug 'onsails/lspkind.nvim'
 
 call plug#end()
@@ -419,7 +418,7 @@ cmp.setup {
         cmp.config.compare.offset,
         cmp.config.compare.exact,
         cmp.config.compare.recently_used,
-        -- require("clangd_extensions.cmp_scores"),
+        require("clangd_extensions.cmp_scores"),
         cmp.config.compare.kind,
         cmp.config.compare.sort_text,
         cmp.config.compare.length,
@@ -476,7 +475,10 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gR', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'ga', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  -- vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts) 
+  -- vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+    
+  require("lsp_signature").on_attach()
+  -- https://github.com/ray-x/lsp_signature.nvim
 end
 
 -- Add additional capabilities supported by nvim-cmp
@@ -509,13 +511,23 @@ require('nvim-autopairs').setup({
 EOF
 
 "-----------------------clang-format------------------------------
-let g:neoformat_cpp_clangformat = {
-    \ 'exe': 'clang-format-11',
-    \ 'args': ['--style="{BasedOnStyle: llvm, IndentWidth: 4, AccessModifierOffset: -4, AllowShortIfStatementsOnASingleLine: true, AlwaysBreakTemplateDeclarations: true, Standard: c++11, BreakBeforeBraces: Stroustrup}"'],
-    \ 'stdin': 1,
-    \}
-let g:neoformat_enabled_cpp = ['clangformat']
-let g:neoformat_enabled_c = ['clangformat']
+"https://github.com/rhysd/vim-clang-format
+let g:clang_format#command='clang-format-11'
+let g:clang_format#detect_style_file=1
+let g:clang_format#code_style='llvm'
+let g:clang_format#style_options = {
+            \ "AccessModifierOffset" : -4,
+            \ "AllowShortIfStatementsOnASingleLine" : "true",
+            \ "AlwaysBreakTemplateDeclarations" : "true",
+            \ "Standard" : "c++11",
+            \ "BreakBeforeBraces" : "Stroustrup"}
+
+" map to <Leader>f in C++ code
+autocmd FileType c,cpp,objc nnoremap <buffer><Leader>cf :<C-u>ClangFormat<CR>
+autocmd FileType c,cpp,objc vnoremap <buffer><Leader>cf :ClangFormat<CR>
+" Toggle auto formatting:
+nmap <Leader>ct :ClangFormatAutoToggle<CR>
+
 "-----------------------DAP---------------------------------------
 "https://github.com/mfussenegger/nvim-dap
 

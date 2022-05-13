@@ -18,6 +18,8 @@ mkdir build
 cd build
 sudo mkdir ${INSTALL_PREFIX}
 ../configure --prefix=${INSTALL_PREFIX} CXXFLAGS="-DSC_CPLUSPLUS=201103L"
+# assuming we want clang
+# ../configure --prefix=${INSTALL_PREFIX} CXXFLAGS="-DSC_CPLUSPLUS=201103L" CC=clang CXX=clang++
 make -j$NPROC
 sudo make install
 echo -e "${green}-I- Installed SystemC, cleaning up${reset}"
@@ -27,4 +29,6 @@ echo -e "${green}-I- Done${reset}"
 echo -e "${green}-I- exporting SYSTEMC_HOME to zshrc${reset}"
 EXPORT_STRING="export SYSTEMC_HOME=${INSTALL_PREFIX}"
 echo $EXPORT_STRING >>~/.zshrc
+EXPORT_STRING2="export LD_LIBRARY_PATH=${INSTALL_PREFIX}/lib-linux64:\$LD_LIBRARY_PATH" #untested
+echo $EXPORT_STRING2 >>~/.zshrc #untested
 echo -e "${green}-I- exported SYSTEMC_HOME to zshrc${reset}"
