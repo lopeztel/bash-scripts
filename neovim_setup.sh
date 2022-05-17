@@ -16,7 +16,7 @@ echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >>~/.zs
 echo -e "${green}-I- Installed necessary plugins for oh-my-zsh"
 
 echo -e "-I- Installing neovim${reset}"
-sudo pacman -S ripgrep fd neovim python-pynvim nodejs npm lazygit
+sudo pacman -S ripgrep fd neovim python-pynvim nodejs npm yarn lazygit
 paru -S clang-format-static-bin
 echo 'export PATH=/opt/clang-format-static:$PATH' >>~/.zshrc
 echo -e "${green}-I- Installing vim-plug${reset}"
