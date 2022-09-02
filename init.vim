@@ -33,6 +33,7 @@ Plug 'rhysd/vim-clang-format'
 Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'preservim/nerdcommenter'
 Plug 'windwp/nvim-autopairs'
+Plug 'AmeerTaweel/todo.nvim'
 
 " debugging
 Plug 'mfussenegger/nvim-dap'
@@ -40,6 +41,9 @@ Plug 'rcarriga/nvim-dap-ui'
 Plug 'rcarriga/cmp-dap'
 Plug 'theHamsta/nvim-dap-virtual-text'
 Plug 'nvim-telescope/telescope-dap.nvim'
+
+" git
+Plug 'airblade/vim-gitgutter'
 
 "Snippets and autocompletion
 Plug 'hrsh7th/cmp-buffer'
@@ -218,6 +222,7 @@ wk.register({
         h = { "in help tags" },
         s = { "in workspace symbols" },
         o = { "in recent files" },
+        t = { "in TODO list" },
       },
 --  d = { "show diagnostics (hover)" },
 --  q = { "show diagnostics (list)" },
@@ -288,7 +293,7 @@ EOF
 nnoremap <leader>ff <cmd>Telescope find_files hidden=true<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep hidden=true<cr>
 nnoremap <leader>fo <cmd>Telescope oldfiles hidden=true<cr>
-" nnoremap <leader>fs <cmd>Telescope grep_string hidden=true<cr>
+nnoremap <leader>ft <cmd>TODOTelescope<cr>
 nnoremap <leader>fs <cmd>Telescope lsp_workspace_symbols<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
@@ -520,6 +525,12 @@ require('nvim-autopairs').setup({
 })
 EOF
 
+"----------------------------todo.nvim----------------------------------
+lua << EOF
+    require("todo").setup {
+    }
+EOF
+
 "-----------------------clang-format------------------------------
 "https://github.com/rhysd/vim-clang-format
 let g:clang_format#command='clang-format-11'
@@ -637,22 +648,6 @@ nnoremap <M-t> :MarkdownPreviewToggle<CR>
 "https://github.com/mfussenegger/nvim-dap
 
 lua << EOF
-vim.keymap.set("n", "<F5>", ":lua require'dap'.continue()<CR>")
-vim.keymap.set("n", "<F10>", ":lua require'dap'step_over()<CR>")
-vim.keymap.set("n", "<F11>", ":lua require'dap'.step_into()<CR>")
-vim.keymap.set("n", "<F12>", ":lua require'dap'.step_out()<CR>")
-vim.keymap.set("n", "<leader>b", ":lua require'dap'.toggle_breakpoint()<CR>")
-vim.keymap.set("n", "<leader>B", ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>")
-vim.keymap.set("n", "<leader>dp", ":lua require'dap'.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))<CR>")
-vim.keymap.set("n", "<leader>dr", ":lua require'dap'.repl_open())<CR>")
-
-local dap = require('dap')
-dap.adapters.cppdbg = {
-  id = 'cppdbg',
-  type = 'executable',
-  command = '/opt/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7',
-}
-
 local dap = require('dap')
 dap.configurations.cpp = {
   {
@@ -684,6 +679,33 @@ dap.configurations.cpp = {
 dap.configurations.c = dap.configurations.cpp
 
 dap.defaults.fallback.terminal_win_cmd = '20split new'
+local dap = require('dap')
+dap.defaults.fallback.external_terminal = {
+  command = '/usr/bin/alacritty';
+  args = {'-e'};
+}
+dap.defaults.fallback.force_external_terminal = true
+
+local dap = require('dap')
+dap.adapters.cppdbg = {
+  id = 'cppdbg',
+  type = 'executable',
+  command = '/opt/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7',
+}
+
+vim.fn.sign_define('DapBreakpoint', {text='🟥', texthl='', linehl='', numhl=''})
+vim.fn.sign_define('DapBreakpointRejected', {text='🟦', texthl='', linehl='', numhl=''})
+vim.fn.sign_define('DapStopped', {text='⭐️', texthl='', linehl='', numhl=''})
+
+vim.keymap.set("n", "<F5>", ":lua require'dap'.continue()<CR>")
+vim.keymap.set("n", "<F10>", ":lua require'dap'step_over()<CR>")
+vim.keymap.set("n", "<F11>", ":lua require'dap'.step_into()<CR>")
+vim.keymap.set("n", "<F12>", ":lua require'dap'.step_out()<CR>")
+vim.keymap.set("n", "<leader>b", ":lua require'dap'.toggle_breakpoint()<CR>")
+vim.keymap.set("n", "<leader>B", ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>")
+vim.keymap.set("n", "<leader>dp", ":lua require'dap'.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))<CR>")
+vim.keymap.set("n", "<leader>dr", ":lua require'dap'.repl_toggle()<CR>")
+vim.keymap.set("n", "<leader>dl", ":lua require'dap'.run_last()<CR>")
 
 -- nvim-telescope/telescope-dap.nvim
 require('telescope').load_extension('dap')
@@ -724,13 +746,13 @@ require("dapui").setup({
         "stacks",
         "watches",
       },
-      size = 40, -- 40 columns
+      size = 60, -- 60 columns
       position = "left",
     },
     {
       elements = {
         "repl",
-        "console",
+        --"console",
       },
       size = 0.25, -- 25% of total lines
       position = "bottom",
