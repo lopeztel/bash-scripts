@@ -57,57 +57,32 @@ wget https://accellera.org/images/downloads/standards/systemc/${SYSTEMC_VERSION}
 unzip -q ${SYSTEMC_VERSION}
 cd ${SYSTEMC_VERSION}
 mkdir build && cd build
-
-while [[ 1 ]]; do
-echo -e "How to install:"
-echo -e "  (1) cmake"
-echo -e "  (2) autoconf"
-read choice
-
-    if [[ $choice == 1 ]]; then
-        BUILD_SYSTEM="cmake"
-        cmake ../ -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
-        make -j$NPROC
-        make check -j$NPROC
-        if [ $? -neq 0]; then
-            echo -e "${red}-E- Something went wrong with the check, exit${reset}"
-            exit 1
-        fi
-        make install
-        break
-    elif [[ $choice == 2 ]]; then
-        BUILD_SYSTEM="autoconf"
-        ../configure --prefix=${INSTALL_PREFIX} CXXFLAGS="-DSC_CPLUSPLUS=201103L"
-        make -j$NPROC
-        make check -j$NPROC
-        if [ $? -neq 0]; then
-            echo -e "${red}-E- Something went wrong with the check, exit${reset}"
-            exit 1
-        fi
-        make install
-        break
-    else
-        echo -e "Wrong choice, try again"
-    fi
-done
+cmake ../ -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
+make -j$NPROC
+make check -j$NPROC
+if [ $? -neq 0]; then
+    echo -e "${red}-E- Something went wrong with the check, exit${reset}"
+    exit 1
+fi
+make install
 
 echo -e "${green}-I- Installed SystemC, cleaning up${reset}"
 cd ../../
 rm -rf ${SYSTEMC_VERSION}.zip ${SYSTEMC_VERSION}
 
 while [[ 1 ]]; do
-echo -e "Install CCI?"
-echo -e "  (1) yes"
-echo -e "  (2) no"
-read choice
+    echo -e "Install CCI?"
+    echo -e "  (1) yes"
+    echo -e "  (2) no"
+    read choice
 
     if [[ $choice == 1 ]]; then
         # check sudo status
         if [[ $AS_SUDO == "false" ]]; then
-            RAPID_JSON_INSTALL_PREFIX=${INSTALL_PREFIX:-~/.local/rapidjson}
+            RAPID_JSON_INSTALL_PREFIX=${RAPID_JSON_INSTALL_PREFIX:-~/.local/rapidjson}
             echo -e "${green}-I- Not running as root, installing rapidJSON to: ${RAPID_JSON_INSTALL_PREFIX} ${reset}"
         elif [[ $AS_SUDO == "true" ]]; then
-            RAPID_JSON_INSTALL_PREFIX=${INSTALL_PREFIX:-/opt/rapidjson}
+            RAPID_JSON_INSTALL_PREFIX=${RAPID_JSON_INSTALL_PREFIX:-/opt/rapidjson}
             echo -e "${green}-I- Running as root, installing rapidJSON to: ${RAPID_JSON_INSTALL_PREFIX} ${reset}"
         fi
         echo -e "${green}-I- Cloning RapidJSON...${reset}"
