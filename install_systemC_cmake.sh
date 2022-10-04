@@ -144,6 +144,7 @@ while [[ 1 ]]; do
         echo -e "${green}-I- Installed AMS, cleaning up${reset}"
         cd ../../
         rm -rf systemc-ams-2.3.tar.gz systemc-ams-2.3
+        break
     elif [[ $choice == 2 ]]; then
         echo -e "${green}-I- AMS not installed${reset}"
         break
