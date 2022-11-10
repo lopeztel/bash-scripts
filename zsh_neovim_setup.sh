@@ -44,7 +44,8 @@ if ! [ -x "$(command -v nvim)" ]; then
 	echo -e "${green}-I- Done${reset}";
 fi
 echo -e "-I- Installing neovim complements${reset}"
-sudo pacman -S ripgrep fd neovim python-pynvim nodejs npm yarn lazygit python-pip
+sudo pacman -S ripgrep fd neovim python-pynvim nodejs npm yarn lazygit python-pip xclip
+sudo npm install -g neovim
 paru -S clang-format-static-bin
 pip install compiledb
 echo 'export PATH=/opt/clang-format-static:~/.local/bin:$PATH' >>~/.zshrc
