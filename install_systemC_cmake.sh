@@ -7,15 +7,7 @@ reset="\e[0m"
 AS_SUDO="false"
 SIMPLE_CURSES="false"
 NPROC=$(nproc)
-
-# check for simple curses installation
-# if [[ -f /usr/local/lib/simple_curses.sh ]]; then
-    #import bashsimplecurses
-    # source /usr/local/lib/simple_curses.sh
-    # SIMPLE_CURSES="true"
-# else
-    # exit
-# fi
+SYSTEMC_HOME=""
 
 while [[ 1 ]]; do
 echo -e "Which SystemC version to download:"
@@ -50,12 +42,12 @@ else
 fi
 
 
-echo -e "${green}-I- Chosen version: ${SYSTEMC_VERSION}, downloading...${reset}"
+echo -e "${green}-I- Chosen version: ${SYSTEMC_VERSION}, downloading... remember that documentation requires doxygen to be installed${reset}"
 wget https://accellera.org/images/downloads/standards/systemc/${SYSTEMC_VERSION}.zip
 unzip -q ${SYSTEMC_VERSION}
 cd ${SYSTEMC_VERSION}
 mkdir build && cd build
-cmake ../ -DINSTALL_TO_LIB_TARGET_ARCH_DIR=ON -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
+cmake ../ -DINSTALL_TO_LIB_TARGET_ARCH_DIR=ON -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DBUILD_SOURCE_DOCUMENTATION
 make -j$NPROC
 make check -j$NPROC
 if [ $? -ne 0 ]; then
@@ -63,6 +55,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 make install
+SYSTEMC_HOME=${INSTALL_PREFIX}
 
 echo -e "${green}-I- Installed SystemC, cleaning up${reset}"
 cd ../../
@@ -152,4 +145,39 @@ while [[ 1 ]]; do
         echo -e "Wrong choice, try again"
     fi
 done
+
+while [[ 1 ]]; do
+    echo -e "Install VCML? (needs libelf-dev, libsdl2-dev and libvncserver-dev installed)"
+    echo -e "  (1) yes"
+    echo -e "  (2) no"
+    read choice
+
+    if [[ $choice == 1 ]]; then
+        git clone https://github.com/machineware-gmbh/vcml.git --recursive
+        cd vcml
+        mkdir build && cd build
+        cmake ../ -DINSTALL_TO_LIB_TARGET_ARCH_DIR=ON -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DVCML_BUILD_TESTS=ON
+        make -j$NPROC
+        if [ $? -ne 0 ]; then
+            echo -e "${red} Something went wrong with the make, exit${reset}"
+            exit 1
+        fi
+        make test -j$NPROC
+        if [ $? -ne 0 ]; then
+            echo -e "${red} Something went wrong with the unit tests, exit${reset}"
+            exit 1
+        fi
+        make install
+        echo -e "${green}-I- Installed VCML, cleaning up${reset}"
+        cd ../../
+        rm -rf vcml
+        break
+    elif [[ $choice == 2 ]]; then
+        echo -e "${green}-I- VCML not installed${reset}"
+        break
+    else
+        echo -e "Wrong choice, try again"
+    fi
+done
 echo -e "${green}-I- Done${reset}"
+echo -e "-I- The whole installation and SYSTEMC_HOME can be found at: ${SYSTEMC_HOME}"
