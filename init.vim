@@ -84,9 +84,9 @@ set splitright          " Vertical split to right of current.
 let mapleader="\<SPACE>"
 
 "-----------------------Tabs--------------------------------------
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
 set expandtab
 set autoindent
 set smarttab
@@ -105,6 +105,11 @@ nnoremap <C-Right> <cmd>tabnext<cr>
 "------------------------Splits-----------------------------------
 nnoremap <S-Right> <cmd>vsplit<cr>
 nnoremap <S-Down> <cmd>split<cr>
+
+"------------------------Moving between buffers-----------------------------------
+nnoremap gb <cmd>bnext<cr>
+nnoremap gB <cmd>bprevious<cr>
+nnoremap bd <cmd>bdelete<cr>
 
 "---------------------------Impatient-----------------------------
 "https://github.com/lewis6991/impatient.nvim
@@ -139,7 +144,7 @@ dashboard.section.header.val = {
 -- Set menu
 dashboard.section.buttons.val = {
     dashboard.button( "e", "  > New file" , ":ene <BAR> startinsert <CR>"),
-    dashboard.button( "f", "  > Find file", ":Telescope find_files<CR>"),
+    dashboard.button( "f", "  > Find file", ":Telescope find_files hidden=true<CR>"),
     dashboard.button( "r", "  > Recent"   , ":Telescope oldfiles<CR>"),
     dashboard.button( "p", "  > Restore previous session"   , ":lua require('persistence').load({ last = true })<CR>"),
     dashboard.button( "s", "  > Settings" , ":e ~/.config/nvim/init.vim<CR>"),
@@ -234,6 +239,7 @@ wk.register({
         l = { "next" },
       },
   ["/"] = { "Toggle comment" },
+  D = { "Show diagnostics" },
   c = {
       name = "comments and clang-format",
       t = { "Toggle auto format" },
@@ -254,6 +260,8 @@ wk.register({
 
 wk.register({
   a = { "code actions" },
+  b = { "next buffer" },
+  B = { "prev buffer" },
   s = { "go to type definition" },
   R = { "rename symbol under cursor" },
   D = { "go to declaration" },
@@ -269,8 +277,9 @@ EOF
 "https://github.com/vim-airline/vim-airline
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline#extensions#tabline#buffer_nr_show = 1
 let g:airline_powerline_fonts = 1
-" let g:Powerline_symbols = 'fancy'
+let g:Powerline_symbols = 'fancy'
 
 "--------------Special characters and Indentline------------------
 "https://github.com/lukas-reineke/indent-blankline.nvim
@@ -471,10 +480,10 @@ cmp.setup.cmdline(':', {
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 local opts = {noremap=true, silent=true}
--- vim.api.nvim_set_keymap('n', '<leader>d', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
--- vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
--- vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
--- vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>D', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
