@@ -14,6 +14,7 @@ echo -e "Which SystemC version to download:"
 echo -e "  (1) 2.3.1"
 echo -e "  (2) 2.3.2"
 echo -e "  (3) 2.3.3"
+echo -e "  (4) 2.3.4"
 read choice
 
     if [[ $choice == 1 ]]; then
@@ -24,6 +25,9 @@ read choice
         break
     elif [[ $choice == 3 ]]; then
         SYSTEMC_VERSION=${SYSTEMC_VERSION:-systemc-2.3.3}
+        break
+    elif [[ $choice == 4 ]]; then
+        SYSTEMC_VERSION=${SYSTEMC_VERSION:-systemc-2.3.4}
         break
     else
         echo -e "Wrong choice, try again"
@@ -43,7 +47,11 @@ fi
 
 
 echo -e "${green}-I- Chosen version: ${SYSTEMC_VERSION}, downloading... remember that documentation requires doxygen to be installed${reset}"
-wget https://accellera.org/images/downloads/standards/systemc/${SYSTEMC_VERSION}.zip
+if [[ $SYSTEMC_VERSION == "systemc-2.3.4" ]]; then
+  wget -O ${SYSTEMC_VERSION}.zip https://github.com/accellera-official/systemc/archive/refs/tags/2.3.4.zip
+else
+  wget  https://accellera.org/images/downloads/standards/systemc/${SYSTEMC_VERSION}.zip
+fi
 unzip -q ${SYSTEMC_VERSION}
 cd ${SYSTEMC_VERSION}
 mkdir build && cd build
