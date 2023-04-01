@@ -164,6 +164,7 @@ while [[ 1 ]]; do
         git clone https://github.com/machineware-gmbh/vcml.git --recursive
         cd vcml
         mkdir build && cd build
+        mkdir ~/.local/vcml
         cmake ../ -DINSTALL_TO_LIB_TARGET_ARCH_DIR=ON -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DVCML_BUILD_TESTS=ON
         make -j$NPROC
         if [ $? -ne 0 ]; then
